@@ -1,0 +1,16 @@
+venv
+venv_new
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.db
+.env
+face.jpg
+test.jpg
+test.mp3
+speech.mp3
+detect_results.txt
+output.log
+uploaded_media/*
+!uploaded_media/.gitkeep

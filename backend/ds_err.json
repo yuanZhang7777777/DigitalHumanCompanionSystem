@@ -1,0 +1,1 @@
+{"status_code": 400, "request_id": "58d5f3d2-0330-40e7-b8c4-291e8427e5e5", "code": "InvalidParameter", "message": "url error, please check url！ For details, see: https://help.aliyun.com/zh/model-studio/error-code#error-url", "output": null, "usage": null}

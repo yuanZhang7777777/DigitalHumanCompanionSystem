@@ -1,0 +1,27 @@
+# Python / Backend
+__pycache__/
+*.py[cod]
+*$py.class
+backend/venv_new/
+backend/venv/
+.env
+
+# Node.js / Frontend
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Editor directories and files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+
+# Geminiai / Agent logs
+.gemini/
+.system_generated/

@@ -1,0 +1,548 @@
+/* ========================================================
+   全局设计系统 — 顶级极简白 (Premium Dynamic Minimalist White)
+   字体：Inter
+   核心：极致留白、克制的颜色、干脆而带有呼吸感的物理弹簧动画
+   ======================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+
+/* ── 设计令牌 ─────────────────────────────────────────── */
+:root {
+  /* Google Modern UI 调色板 (Official Google Palette) */
+  --c-white: #ffffff;
+  --c-offwhite: #f8f9fa;
+  --c-black: #202124;
+  /* Google Text Dark */
+
+  --c-google-blue: #1a73e8;
+  /* Standard Google Blue */
+  --c-google-blue-hover: #174ea6;
+  --c-google-blue-light: #e8f0fe;
+  --c-google-red: #ea4335;
+  --c-google-yellow: #fbbc04;
+  --c-google-green: #34A853;
+  --c-google-purple: #a142f4;
+
+  /* 背景：更干净的实心背景或极简渐变 */
+  --c-bg-app: #ffffff;
+  --c-bg-page: #f8f9fa;
+
+  --c-gray-50: #f8f9fa;
+  --c-gray-100: #f1f3f4;
+  --c-gray-200: #e8eaed;
+  --c-gray-300: #dadce0;
+  --c-gray-400: #9aa0a6;
+  --c-gray-500: #80868b;
+  --c-gray-600: #5f6368;
+  --c-gray-700: #3c4043;
+  --c-gray-800: #202124;
+  --c-gray-900: #1f1f1f;
+
+  /* 主品牌色：改为谷歌蓝 */
+  --c-primary: var(--c-google-blue);
+
+  /* 排版：使用更接近 Google Sans 的字体 */
+  --font: 'Google Sans', 'Product Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* 间距 */
+  --space-1: 8px;
+  --space-2: 12px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+  --space-6: 48px;
+  --space-8: 64px;
+  --space-10: 80px;
+  --space-12: 100px;
+  --space-16: 140px;
+
+  /* 圆角：谷歌倾向于适中的圆角或大圆角，这里采用 8px-24px */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* 谷歌风格阴影：非常轻盈且真实 */
+  --shadow-sm: 0 1px 2px 0 rgba(60, 64, 67, .3), 0 1px 3px 1px rgba(60, 64, 67, .15);
+  --shadow-md: 0 1px 3px 0 rgba(60, 64, 67, .3), 0 4px 8px 3px rgba(60, 64, 67, .15);
+  --shadow-lg: 0 4px 4px 0 rgba(60, 64, 67, .3), 0 8px 12px 6px rgba(60, 64, 67, .15);
+
+  /* 动画 */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast: 150ms;
+  --dur-normal: 250ms;
+  --dur-slow: 450ms;
+}
+
+/* ── 基础重置 ─────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--c-bg-app);
+  color: var(--c-gray-700);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── 排版 (纯净克制) ────────────────────────────────── */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: var(--c-black);
+}
+
+h1 {
+  font-size: clamp(3rem, 6vw, 5rem);
+}
+
+h2 {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+}
+
+h3 {
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
+}
+
+p {
+  color: var(--c-gray-600);
+  line-height: 1.8;
+  letter-spacing: -0.01em;
+}
+
+/* ── 实心卡片 / 面板 (Google Workspace Style) ───────────── */
+.clean-pane {
+  background: var(--c-white);
+  border: 1px solid var(--c-gray-300);
+  box-shadow: none;
+  border-radius: var(--radius-sm);
+  transition: box-shadow var(--dur-normal);
+}
+
+/* 动态卡片 (Google Search Result / Feed style) */
+.dynamic-card {
+  background: var(--c-white);
+  border: 1px solid var(--c-gray-300);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4);
+  transition: box-shadow var(--dur-fast), border-color var(--dur-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.dynamic-card:hover {
+  box-shadow: var(--shadow-sm);
+  border-color: transparent;
+  z-index: 10;
+}
+
+.dynamic-card:active {
+  background: var(--c-gray-50);
+}
+
+/* ── 按钮系统 (Pills & Solid) ────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: 12px 24px;
+  border-radius: 100px;
+  font-family: var(--font);
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease);
+  border: none;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+/* 主按钮：改为谷歌蓝 */
+.btn-primary {
+  background: var(--c-google-blue);
+  color: var(--c-white);
+}
+
+.btn-primary:hover {
+  background: var(--c-google-blue-hover);
+  box-shadow: 0 1px 3px 1px rgba(66, 133, 244, .15), 0 1px 2px 0 rgba(66, 133, 244, .3);
+}
+
+.btn-primary:active {
+  background: #1967d2;
+}
+
+/* 次要按钮：白底/浅灰，无边线 */
+.btn-secondary {
+  background: #F1F3F4;
+  color: #1F1F1F;
+  border: 1px solid transparent;
+}
+
+.btn-secondary:hover {
+  background: #E8EAED;
+  color: #1F1F1F;
+}
+
+/* 幽灵按钮：仅文字悬浮变色 */
+.btn-ghost {
+  background: transparent;
+  color: var(--c-gray-500);
+}
+
+.btn-ghost:hover {
+  color: var(--c-black);
+  background: var(--c-gray-100);
+}
+
+/* 危险按钮：克制的红 */
+.btn-danger {
+  background: transparent;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.btn-danger:hover {
+  background: #fee2e2;
+}
+
+/* 尺寸变体 */
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+}
+
+.btn-lg {
+  padding: 18px 40px;
+  font-size: 1.05rem;
+}
+
+.btn-icon {
+  padding: 12px;
+  border-radius: 50%;
+}
+
+.btn-full {
+  width: 100%;
+}
+
+.btn:disabled,
+.btn-loading {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+/* ── 表单系统 (Clean Fields) ─────────────────────────── */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.form-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--c-gray-500);
+  text-transform: uppercase;
+}
+
+.form-input,
+.form-textarea,
+.form-select {
+  width: 100%;
+  padding: 16px 20px;
+  border: 1px solid var(--c-gray-200);
+  border-radius: var(--radius-md);
+  font-family: var(--font);
+  font-size: 1rem;
+  color: var(--c-black);
+  background: var(--c-gray-50);
+  transition: all var(--dur-fast) var(--ease);
+  outline: none;
+  appearance: none;
+}
+
+.form-input:hover,
+.form-textarea:hover,
+.form-select:hover {
+  border-color: var(--c-gray-300);
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+  background: var(--c-white);
+  border-color: var(--c-google-blue);
+  box-shadow: 0 0 0 1px var(--c-google-blue);
+  /* 柔和的 Google 蓝输入框反馈 */
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: var(--c-gray-400);
+  font-weight: 400;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.6;
+}
+
+/* ── 标签系统 (Quiet Badges) ─────────────────────────── */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--c-gray-100);
+  color: var(--c-gray-600);
+  border: 1px solid transparent;
+  transition: all var(--dur-fast);
+  white-space: nowrap;
+}
+
+.tag-filled {
+  background: var(--c-black);
+  color: var(--c-white);
+}
+
+.tag-removable {
+  cursor: pointer;
+}
+
+.tag-removable:hover {
+  opacity: 0.8;
+}
+
+/* ── 分割线 ───────────────────────────────────────────── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--c-gray-100);
+  margin: var(--space-8) 0;
+}
+
+/* ── 加载动画 (简约黑圈) ──────────────────────────────── */
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--c-gray-200);
+  border-top-color: var(--c-black);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── 页面过渡与进入动画 (Staggered Stiff Tween) ───────── */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity var(--dur-normal) var(--ease),
+    transform var(--dur-normal) var(--ease);
+}
+
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.page-leave-to {
+  opacity: 0;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp var(--dur-slow) var(--ease) both;
+}
+
+.animate-scale-in {
+  animation: scaleIn var(--dur-slow) var(--ease) both;
+}
+
+.delay-1 {
+  animation-delay: 100ms;
+}
+
+.delay-2 {
+  animation-delay: 200ms;
+}
+
+.delay-3 {
+  animation-delay: 300ms;
+}
+
+.delay-4 {
+  animation-delay: 400ms;
+}
+
+.delay-5 {
+  animation-delay: 500ms;
+}
+
+/* ── 布局工具 ─────────────────────────────────────────── */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
+/* ── 极简导航栏 (Sterile Header) ─────────────────────── */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--c-gray-100);
+  height: 80px;
+  display: flex;
+  align-items: center;
+  transition: border-bottom-color var(--dur-fast);
+}
+
+.app-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.app-logo {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  color: var(--c-black);
+}
+
+.app-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.nav-link {
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--c-gray-500);
+  transition: all var(--dur-fast);
+  cursor: pointer;
+}
+
+.nav-link:hover {
+  color: var(--c-black);
+  background: var(--c-gray-100);
+}
+
+.nav-link.active {
+  color: var(--c-black);
+  background: var(--c-gray-100);
+}
+
+/* ── 优雅滚动条 ───────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--c-gray-200);
+  border-radius: 8px;
+  border: 2px solid var(--c-white);
+  /* 造成内补丁的错觉 */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--c-gray-400);
+}
+
+/* ── 强制反色选中 ─────────────────────────────────────── */
+::selection {
+  background: var(--c-black);
+  color: var(--c-white);
+}
+
+/* ── 极简 Toast 提示 ──────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--c-white);
+  color: var(--c-black);
+  padding: 16px 32px;
+  border-radius: var(--radius-full);
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--c-gray-100);
+  z-index: 9999;
+  transition: transform var(--dur-slow) var(--ease);
+  white-space: nowrap;
+}
+
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+}

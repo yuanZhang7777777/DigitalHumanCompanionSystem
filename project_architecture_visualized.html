@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企业级数字人陪伴项目 - 架构与核心流程可视化</title>
+    <!-- 引入 Tailwind CSS 让页面更美观 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Mermaid 用于渲染流程图 -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'base',
+            themeVariables: {
+                primaryColor: '#e0f2fe',
+                primaryTextColor: '#1e3a8a',
+                primaryBorderColor: '#7dd3fc',
+                lineColor: '#94a3b8',
+                secondaryColor: '#f1f5f9',
+                tertiaryColor: '#fff'
+            }
+        });
+    </script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #f8fafc; color: #334155; }
+        .mermaid { display: flex; justify-content: center; margin: 2rem 0; overflow-x: auto; background: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        h1, h2, h3 { color: #0f172a; font-weight: 700; }
+        .card { background: white; border-radius: 0.75rem; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); }
+        .highlight { background-color: #f1f5f9; padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-family: monospace; color: #db2777; }
+    </style>
+</head>
+<body class="antialiased p-8 max-w-6xl mx-auto">
+
+    <header class="text-center mb-12">
+        <h1 class="text-4xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+            数字人陪伴项目 - 架构与流程可视化
+        </h1>
+        <p class="text-lg text-slate-500">此报告提供给项目负责人及评审团，详尽梳理了前后端架构、RAG记忆检索及多模态流转。</p>
+    </header>
+
+    <div class="card border-t-4 border-blue-500">
+        <h2 class="text-2xl mb-2">1. 整体技术架构拓扑 (Architecture Topology)</h2>
+        <p class="mb-4 text-slate-600">项目采用标准的前后端分离模式，以 FastAPI 为业务枢纽，向下连接本地 GPU 算力池（语音合成、视频渲染），向上接入云端 LLM 及向量计算能力（阿里云 Dashscope）。</p>
+        
+        <div class="mermaid">
+        flowchart TD
+            %% 前端层
+            subgraph Frontend ["前端 (Vue 3 + Vite + Tailwind)"]
+                UI["UI 组件库"]
+                Router["Vue Router 路由"]
+                State["Pinia 全局状态"]
+                API_JS["Axios / SSE 接口请求"]
+            end
+
+            %% 后端层
+            subgraph Backend ["后端业务核心 (FastAPI)"]
+                direction TB
+                Router_Auth["认证及鉴权路由 auth.py"]
+                Router_Chat["对话及流式控制 conversation.py"]
+                
+                Service_AI["大模型会话服务 ai_service.py"]
+                Service_Mem["长期记忆服务 memory_service.py"]
+                Service_Emb["向量嵌入服务 embedding_service.py"]
+                Service_TTS["语音合成中控 tts_service.py"]
+                Service_Video["视频面部驱动 video_service.py"]
+                
+                Router_Auth -.-> |"JWT 校验"| Router_Chat
+                Router_Chat --> Service_AI
+                Router_Chat --> Service_Mem
+                
+                Service_Mem --> |"注入向量化引擎"| Service_Emb
+                Service_Mem -.-> |"生成记忆摘要"| Service_AI
+            end
+
+            %% 数据支撑层
+            subgraph Database ["数据持久层 (MongoDB Motor Async)"]
+                DB_Users[("Users 账户体系")]
+                DB_Profiles[("User_Profiles 档案库")]
+                DB_Memories[("User_Memories 记忆向量库")]
+            end
+
+            %% 云计算与大模型生态
+            subgraph Cloud_AI ["云端能力 (阿里云 Dashscope)"]
+                LLM["通义千问 qwen-plus"]
+                Embedding["text-embedding-v3 高维向量"]
+            end
+
+            %% 本地算力模型
+            subgraph Local_AI ["本地 GPU / 专属模型算力"]
+                TTS["GPT-SoVITS 专属音色克隆"]
+                VideoGen["LivePortrait 视频/缓存懒加载"]
+            end
+
+            %% 网络拓扑连接
+            API_JS <-->|"HTTP 请求 / SSE 流式传输"| Backend
+            Backend <-->|"异步无阻塞 IO"| Database
+            
+            Service_AI <-->|"HTTPS API 调用"| LLM
+            Service_Emb <-->|"HTTPS API 调用"| Embedding
+            
+            Service_TTS <-->|"内部 HTTP Proxy"| TTS
+            Service_Video <-->|"内部视频源分配"| VideoGen
+        </div>
+    </div>
+
+    <div class="card border-t-4 border-indigo-500">
+        <h2 class="text-2xl mb-2">2. 核心大动脉：基于 RAG 检索的流式聊天时序</h2>
+        <p class="mb-4 text-slate-600">此流程图完美展示了当你发出一条消息后，系统如何在 <span class="highlight">conversation.py</span> 中流转，利用 <span class="highlight">EmbeddingService</span> 进行语义检索，再通过大模型串流实时打字机效果。</p>
+
+        <div class="mermaid">
+        sequenceDiagram
+            autonumber
+            participant User as 用户 (前端)
+            participant ConvRouter as 对话网关 (FastAPI)
+            participant Memory as 记忆中心 (memory_service)
+            participant Emb as 向量引擎 (embedding_service)
+            participant Prompt as 人设工坊 (prompt_service)
+            participant AI as Qwen大模型 (ai_service)
+            
+            User->>ConvRouter: 发送文字 "你还记得我之前买的猫吗？" (POST /api/conversations/stream)
+            
+            rect rgb(238, 242, 255)
+            Note right of ConvRouter: 🔥 核心环节: RAG 向量记忆检索
+            ConvRouter->>Memory: fetch: get_relevant_memories(用户输入)
+            Memory->>Emb: process: embed_text(用户输入)
+            Emb-->>Memory: return: [0.012, -0.045, ... 1024维向量]
+            Memory->>Memory: 执行本地余弦相似度对比 (Cosine Similarity)，筛选 Top 5 记忆
+            Memory-->>ConvRouter: return: [{"content": "用户买了一只猫叫小白", "score": 0.89}]
+            end
+            
+            ConvRouter->>Prompt: inject: build_persona_prompt(人设, Top5记忆, 近期上下文)
+            Prompt-->>ConvRouter: return: 完整巨无霸 System Prompt
+            
+            ConvRouter->>AI: execute: chat_stream(Prompt + 用户输入)
+            
+            rect rgb(240, 253, 244)
+            Note right of AI: SSE 流式响应 (Server-Sent Events)
+            loop 接收数据块 (Chunk)
+                AI-->>User: 返回文字片段 (例如："记得呀，它叫")
+                AI-->>User: 返回文字片段 (例如："小白对吧？")
+            end
+            end
+            
+            Note right of ConvRouter: 异步后处理
+            ConvRouter->>Memory: async: _trigger_memory_extraction() 判定是否需要新生记忆
+        </div>
+    </div>
+
+    <div class="card border-t-4 border-fuchsia-500">
+        <h2 class="text-2xl mb-2">3. 左手记性，右手记忆：记忆向量化沉淀流</h2>
+        <p class="mb-4 text-slate-600">数字人是如何实现“过目不忘”的？这里展示了后台静默触发的信息抽取脱水、排重及向量数据库入库流程。</p>
+
+        <div class="mermaid">
+        flowchart TD
+            Trigger(("积累 N 条新对话")) --> Step1
+            
+            Step1["1. AI_Service: 信息提炼"]:::proc
+            Step1 -->|"大语模型提取出结构化事件"| Step2
+            
+            Step2["2. Memory_Service: 去重判定 _deduplicate"]:::proc
+            Step2 --> Check{"计算内容哈希/关键词"}
+            
+            Check -- "检测到完全重复" --> Drop(["丢弃，避免冗余"]):::drop
+            Check -- "确认为新记忆" --> Step3
+            
+            Step3["3. Embedding_Service: 向量化转换"]:::proc
+            Step3 -->|"调用阿里云 Text-Embedding API"| VectorData["1024 维数学向量"]
+            
+            VectorData --> Step4
+            Step4["4. MongoDB: 联合持久化"]:::proc
+            Step4 --> End(("记忆库更新成功，反哺 RAG 取用"))
+            
+            classDef proc fill:#f9fafb,stroke:#d1d5db,stroke-width:2px;
+            classDef drop fill:#fef2f2,stroke:#fca5a5,color:#b91c1c;
+        </div>
+    </div>
+
+    <div class="card border-t-4 border-teal-500">
+        <h2 class="text-2xl mb-2">4. 视听多模态流转 (TTS 与 嘴型驱动)</h2>
+        <p class="mb-4 text-slate-600">解答了文字如何化身成为有感情的声音，以及前端驱动活灵活现的数字人全景。</p>
+
+        <div class="mermaid">
+        flowchart LR
+            A(("前端收到大模型\n完整句子完毕")) --> B{"模式检查"}
+            
+            B -- "开启声音" --> C["向后端索要语音 /api/tts/generate"]
+            B -- "静音模式" --> Z(["纯静态文本打字机展示"])
+            
+            C --> D["后端通过 tts_service 转交 GPT-SoVITS"]
+            D --> E["GPT-SoVITS 合成 WAV 音频缓存"]
+            
+            E --> F["前端获取音频流缓冲完毕, 准备 Play"]
+            
+            F --> G["联动触发播放"]
+            G --> H(["开始播放音频"])
+            G --> I(["DOM 显示对应的表情视频缓存流"])
+            
+            H & I --> J(("句子播报结束，回落待机状态"))
+        </div>
+    </div>
+
+</body>
+</html>
