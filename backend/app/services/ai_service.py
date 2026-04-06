@@ -16,9 +16,9 @@ logger = logging.getLogger(__name__)
 # openai >= 1.51.0, httpx 兼容
 
 # 最大重试次数
-MAX_RETRIES = 3
+MAX_RETRIES = 2
 # 重试间隔（秒）
-RETRY_DELAY = 1.0
+RETRY_DELAY = 1.5
 
 
 class AIService:
@@ -28,7 +28,7 @@ class AIService:
         self._client = AsyncOpenAI(
             api_key=settings.ai_api_key,
             base_url=settings.ai_base_url,
-            timeout=30.0,
+            timeout=60.0,  # 增加超时时间到60秒
         )
         self.model = settings.ai_model
         logger.info(f"AI 服务初始化完成，模型: {self.model}")
@@ -79,6 +79,49 @@ class AIService:
 
         # 所有重试失败后的降级回复
         return "抱歉，我现在暂时无法回应，请稍后再试。"
+
+    async def chat_with_vision(
+        self,
+        messages: List[Dict],
+        system_prompt: str = "",
+        temperature: Optional[float] = None,
+        max_tokens: Optional[int] = None,
+    ) -> str:
+        """
+        处理视觉多模态请求。
+        内部强制使用 vision_model，并且将 system prompt 转换为 user 序列的文本，以兼容多模态模型要求。
+        """
+        request_messages = []
+        if system_prompt:
+             request_messages.append({"role": "system", "content": system_prompt})
+        request_messages.extend(messages)
+        
+        vision_model = getattr(settings, 'vision_model', 'qwen-vl-plus')
+        logger.info(f"使用视觉模型处理请求: {vision_model}")
+
+        for attempt in range(MAX_RETRIES):
+            try:
+                response = await self._client.chat.completions.create(
+                    model=vision_model,
+                    messages=request_messages,
+                    max_tokens=max_tokens or settings.ai_max_tokens,
+                    temperature=temperature or settings.ai_temperature,
+                )
+                reply = response.choices[0].message.content.strip()
+                logger.debug(f"AI多模态回复成功（第 {attempt + 1} 次尝试）")
+                return self._filter_output(reply)
+            except APITimeoutError:
+                logger.warning(f"AI多模态请求超时（第 {attempt + 1} 次）")
+                if attempt < MAX_RETRIES - 1:
+                    await asyncio.sleep(RETRY_DELAY * (attempt + 1))
+            except Exception as e:
+                logger.error(f"AI多模态请求异常: {e}")
+                if attempt < MAX_RETRIES - 1:
+                    await asyncio.sleep(RETRY_DELAY)
+                else:
+                    break
+        
+        return "抱歉，由于网络或模型问题，我现在无法识别多模态消息，请稍后再试。"
 
     async def chat_stream(
         self,

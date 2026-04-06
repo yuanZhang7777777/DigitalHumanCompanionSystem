@@ -79,6 +79,14 @@ class VideoService:
     async def generate_generic_talking_head(self, user_id: str, avatar_local_path: str, audio_local_path: str) -> str:
         """
         核心方法：使用 REST API 调用万象 (wan2.2-s2v) 视频合成 (北京端点)
-        当前已禁用图生视频功能，直接抛出异常
+        
+        开关控制：
+        - 默认关闭（节省费用）
+        - 开启方式：在 .env 文件中设置 VIDEO_GENERATION_ENABLED=True
         """
-        raise Exception("因近期视频生成费用过高，系统暂时禁用视频生成功能！后续开放时间请关注通知。")
+        # 检查视频生成开关
+        if not settings.video_generation_enabled:
+            logger.warning(f"[视频生成] ⚠️ 功能已关闭：{settings.video_generation_reason}")
+            raise Exception(settings.video_generation_reason)
+        
+        logger.info(f"[视频生成] ✅ 功能已开启，开始处理请求...")

@@ -28,8 +28,8 @@ class Settings(BaseSettings):
 
     # ── 视觉多模态模型配置（图片/视频理解）─────────────────────────────────
     vision_model: str = Field(default="qwen-vl-plus", alias="VISION_MODEL")  # 阿里云视觉语言模型
-    vision_max_image_size_mb: int = Field(default=10, alias="VISION_MAX_IMAGE_SIZE_MB")
-    vision_max_video_size_mb: int = Field(default=50, alias="VISION_MAX_VIDEO_SIZE_MB")
+    vision_max_image_size_mb: int = Field(default=2, alias="VISION_MAX_IMAGE_SIZE_MB") # 缩小至 2MB 控制成本
+    vision_max_video_size_mb: int = Field(default=10, alias="VISION_MAX_VIDEO_SIZE_MB") # 缩小至 10MB 控制成本
 
     # ── 智能语音识别配置（DashScope Paraformer 实时 ASR）────────────────────
     dashscope_asr_model: str = Field(default="paraformer-realtime-v2", alias="DASHSCOPE_ASR_MODEL")
@@ -60,6 +60,10 @@ class Settings(BaseSettings):
 
     # ── 限流配置 ─────────────────────────────────────────────────────────────
     max_concurrent_per_user: int = Field(default=2, alias="MAX_CONCURRENT_PER_USER")  # 每用户最大并发数
+
+    # ── 视频生成配置 ────────────────────────────────────────────────────────
+    video_generation_enabled: bool = Field(default=False, alias="VIDEO_GENERATION_ENABLED")  # 视频生成开关（默认关闭）
+    video_generation_reason: str = "因近期视频生成费用较高，系统默认关闭视频生成功能。如需开启，请修改 .env 文件设置 VIDEO_GENERATION_ENABLED=True"
 
     # ── 应用配置 ────────────────────────────────────────────────────────────
     app_name: str = "在 · 数字人情感陪伴系统"

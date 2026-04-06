@@ -60,6 +60,15 @@ class PromptService:
 - 保持客观务实，强调"先就业再择业"，不要画大饼。
 - 直接点出可以马上执行的下一步行动（Action Item）。
 """,
+        "jd_analysis": """
+## 📋 【当前场景：岗位 JD 深度解析及面试拟真模式】
+当前用户可能提供了一份岗位描述（JD）或者招聘要求（可能是文字，也可能是图片形式附件）。
+**你现在是一位资深的顶级大厂 HR 兼技术面试官：**
+1. **岗位精炼剖析**：一针见血指出这个岗位的核心能力底线、隐性要求及潜藏的业务挑战。
+2. **定制化企业级面试题**：严格基于该 JD 提及的具体技术栈、工具链、业务场景或软技能，为用户量身生成 3-5 道高质量的“实战连环追问”面试题。
+3. **考察点拆解**：针对你出的每一道面试题，指出“面试官想听到什么标签的回答 / 这个考核点是什么”。
+4. **排版格式**：结构要非常清晰，利用分步和小标题，让分析既锐利又易于吸收。
+""",
         "casual": """
 ## ☕ 【当前场景：轻松聊天模式】
 正常闲聊氛围。
@@ -80,12 +89,16 @@ class PromptService:
         if re.search(r'(不想活|想死|死了算了|轻生|自杀|抑郁症犯了|绝望|别拦我|没意思了|撑不下去)', msg) or "严重抑郁" in recent_emotion:
             return "crisis"
             
-        # 2. 面试检测（扩充关键词覆盖）
+        # 2. 岗位JD解析检测（高优先级：不仅是面试，更是给出了具体的岗位分析请求）
+        if re.search(r'(这就是jd|这是jd|岗位描述|招聘要求|帮我看看这个岗位|面试这个岗位|这个jd|这个招聘|jd文本|jd截图|职位描述)', msg):
+            return "jd_analysis"
+
+        # 3. 面试检测（扩充关键词覆盖）
         if re.search(r'(面试|笔试|群面|hr面|技术面|约面|面经|收到offer|背调|自我介绍|怎么回答|'
                      r'面试官|终面|复试|HR打电话|约了明天|面完了|刚面试|面试准备|面试回来)', msg):
             return "interview"
             
-        # 3. 情感压力检测
+        # 4. 情感压力检测
         if re.search(r'(焦虑|难过|迷茫|好累|崩溃|烦躁|压力大|睡不着|想哭|孤独|内耗)', msg):
             return "emotional"
             
@@ -167,38 +180,40 @@ class PromptService:
         # ── 高级扩展模块（记忆/简历/岗位/摘要）───────────────────────────────────
         memory_section = ""
         if memories:
-            sorted_memories = sorted(memories, key=lambda m: m.get("importance_score", 0), reverse=True)[:15]
-            memory_lines = [f"- {mem.get('content', '')}" for mem in sorted_memories]
+            # 只取最重要的5条记忆（减少token消耗）
+            sorted_memories = sorted(memories, key=lambda m: m.get("importance_score", 0), reverse=True)[:5]
+            memory_lines = [f"- {mem.get('content', '')[:80]}" for mem in sorted_memories]  # 限制每条记忆80字
             if memory_lines:
-                memory_section = "\n## 你对用户的了解（核心长期记忆）\n" + "\n".join(memory_lines)
+                memory_section = "\n## 用户关键信息\n" + "\n".join(memory_lines)
 
         profile_section = ""
         if user_profile:
             profile_lines = filter(None, [
                 f"- 学历专业：{user_profile.get('education', '')} {user_profile.get('major', '')}".strip() if user_profile.get('education') or user_profile.get('major') else None,
-                f"- 技能：{'、'.join(user_profile.get('skills', []))}" if user_profile.get('skills') else None,
+                f"- 技能：{'、'.join(user_profile.get('skills', [])[:10])}" if user_profile.get('skills') else None,  # 限制技能数量
                 f"- 工作年限：{user_profile.get('experience_years')}" if str(user_profile.get('experience_years')) not in ["0", "", "None"] else None,
-                f"- 经历简介：{user_profile.get('experience_summary')}" if user_profile.get('experience_summary') else None
             ])
             lines = list(profile_lines)
             if lines:
-                profile_section = "\n## 用户的真实背景（请结合这些背景给建议）\n" + "\n".join(lines)
+                profile_section = "\n## 用户的真实背景\n" + "\n".join(lines)
 
         history_section = ""
         if recent_messages:
-            answered_topics = [f"- 用户刚刚说：{msg['content'][:60]}" for msg in recent_messages if msg.get("role") == "user" and msg.get("content")]
+            answered_topics = [f"- {msg['content'][:40]}" for msg in recent_messages[-3:] if msg.get("role") == "user" and msg.get("content")]  # 只取最近3条，每条40字
             if answered_topics:
-                history_section = "\n## 近期短期上下文\n" + "\n".join(answered_topics[-4:])
+                history_section = "\n## 近期对话\n" + "\n".join(answered_topics)
 
         summary_section = ""
         if history_summary:
-            summary_section = f"\n## 你们的过往超长历史摘要\n{history_summary}\n"
+            # 限制历史摘要长度为200字（避免超时）
+            truncated_summary = history_summary[:300] + "..." if len(history_summary) > 300 else history_summary
+            summary_section = f"\n## 对话历史摘要\n{truncated_summary}\n"
 
         job_section = ""
         if recommended_jobs:
-            job_lines = [f"- **{job.get('title', '')}**（{job.get('company', '')}，匹配度{job.get('match_score', 0)}%）" for job in recommended_jobs[:3]]
+            job_lines = [f"- **{job.get('title', '')}**（{job.get('company', '')}，匹配度{job.get('match_score', 0)}%）" for job in recommended_jobs[:2]]  # 只取前2个岗位
             if job_lines:
-                job_section = "\n## 系统匹配岗位（可自然推荐）\n" + "\n".join(job_lines)
+                job_section = "\n## 推荐岗位\n" + "\n".join(job_lines)
 
         weather_section = ""
         if weather_info:
@@ -206,7 +221,9 @@ class PromptService:
             
         interview_kb_section = ""
         if interview_knowledge:
-            interview_kb_section = f"\n{interview_knowledge}\n"
+            # 精简面试知识库，只保留核心内容（限制500字）
+            truncated_kb = interview_knowledge[:500] + "..." if len(interview_knowledge) > 500 else interview_knowledge
+            interview_kb_section = f"\n{truncated_kb}\n"
 
         # ── 组合最终 Prompt ───────────────────────────────────────────────────
         prompt = f"""你是{name}，用户的{relationship}。

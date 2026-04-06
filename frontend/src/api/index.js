@@ -58,9 +58,73 @@ export const digitalPersonAPI = {
 // ── 对话接口 ─────────────────────────────────────────────────────────────────
 export const conversationAPI = {
   sendMessage: (data) => api.post('/api/conversations/message', data),
+  sendMessageStream: async (data, onChunk) => {
+    // 流式输出API（SSE）
+    const token = localStorage.getItem('access_token')
+    const headers = {
+      'Content-Type': 'application/json',
+    }
+    
+    // 添加认证Token（修复403错误）
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+    
+    const response = await fetch('/api/conversations/message/stream', {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify(data),
+    })
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        localStorage.clear()
+        window.location.href = '/login'
+      }
+      throw new Error(`请求失败: ${response.status}`)
+    }
+
+    const reader = response.body.getReader()
+    const decoder = new TextDecoder()
+    let buffer = ''
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop() || ''  // 保留未完成的行
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.slice(6)
+          if (data === '[DONE]') return
+          try {
+            const parsed = JSON.parse(data)
+            
+            // ✅ 兼容多种SSE格式（chunk/content/meta_start/done）
+            if (parsed.chunk && onChunk) {
+              // 后端流式输出格式：{"chunk": "文本"}
+              onChunk(parsed.chunk)
+            } else if (parsed.content && onChunk) {
+              // 标准SSE格式：{"content": "文本"}
+              onChunk(parsed.content)
+            }
+            // 忽略 meta_start 和 done 信号
+          } catch (e) {
+            // 忽略解析错误
+          }
+        }
+      }
+    }
+  },
   list: () => api.get('/api/conversations/'),
   get: (id) => api.get(`/api/conversations/${id}`),
   delete: (id) => api.delete(`/api/conversations/${id}`),
+  deleteMessage: (conversationId, messageId) => api.delete(`/api/conversations/${conversationId}/messages/${messageId}`),
+  uploadFile: (formData) => api.post('/api/conversations/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  analyzeJD: (data) => api.post('/api/conversations/analyze-jd', data),
 }
 
 // ── 记忆接口（完整 CRUD）────────────────────────────────────────────────────
