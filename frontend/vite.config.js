@@ -21,6 +21,11 @@ export default defineConfig({
           })
         },
       },
+      // 静态文件代理（图片、视频等上传文件）
+      '/static': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+      },
       '/health': {
         target: 'http://127.0.0.1:8000',
         changeOrigin: true,

@@ -281,3 +281,261 @@ class InterviewService:
     def get_interview_tips_array(self) -> List[str]:
         """返回给前端 SSE 引用的 Tips 列表"""
         return self.COMMON_TIPS
+
+    def generate_jd_analysis_prompt(self, jd_text: str) -> str:
+        """
+        生成专门针对 JD 的 AI 引导 Prompt。
+        设计精粹：通过技术栈反向检索知识库，实现跨专业联想。
+        """
+        if not jd_text or len(jd_text) < 10:
+            return "（用户提供的 JD 内容过短，请引导用户提供更详细的职位描述或上传 JD 图片）"
+
+        # 1. 技术栈启发式提取
+        found_keywords = []
+        identified_major = "通用"
+        
+        for major, data in self.KNOWLEDGE_BASE.items():
+            match_count = 0
+            for kw in data["keywords"]:
+                if kw.lower() in jd_text.lower():
+                    found_keywords.append(kw)
+                    match_count += 1
+            if match_count >= 2:
+                identified_major = major
+
+        tech_stack = "、".join(list(set(found_keywords))[:12])
+        
+        # 2. 构建针对性的结构化引导
+        return (
+            f"【JD 实时分析引擎 - 当前识别专业：{identified_major}】\n"
+            f"--- 核心技术栈捕捉: {tech_stack if tech_stack else '主要考察综合素质/通用技能'} ---\n"
+            f"请你立即切换为【高级技术面试官】角色，执行以下专项分析：\n"
+            f"1. **岗位画像拆解**：根据 JD 描述，用 3 句话点破该岗位的核心痛点（面试官最担心候选人不会什么）。\n"
+            f"2. **企业级实战提问**：针对识别到的技术栈 {tech_stack}，设计 3 道环环相扣的\"压力面试题\"，模拟真实大厂追问环节。\n"
+            f"3. **差异化竞争策略**：告诉用户在这个岗位的面试中，提哪一个关键词或哪一种经历能瞬间在众多候选人中脱颖而出。\n"
+            f"请注意：保持专业、犀利且富有启发性，不要说废话。"
+        )
+
+    async def generate_jd_interview_questions(self, jd_text: str, ai_service) -> dict:
+        """
+        基于 JD 内容使用 AI 生成企业级面试题
+        返回结构化数据包含：
+        - 企业级行为面试题（STAR 法则）
+        - 技术栈深度提问
+        - 情景模拟题
+        - 反问建议
+        """
+        if not jd_text or len(jd_text) < 10:
+            return {"error": "JD 内容过短，请提供更详细的职位描述"}
+
+        # 识别专业方向
+        identified_major = "通用"
+        found_keywords = []
+        for major, data in self.KNOWLEDGE_BASE.items():
+            match_count = 0
+            for kw in data["keywords"]:
+                if kw.lower() in jd_text.lower():
+                    found_keywords.append(kw)
+                    match_count += 1
+            if match_count >= 2:
+                identified_major = major
+
+        tech_stack = list(set(found_keywords))[:10]
+
+        # 构建生成 prompt
+        prompt = f"""你是一位资深的技术面试官和职业规划专家。请根据以下 JD（职位描述）生成完整的面试准备方案。
+
+## JD 内容：
+{jd_text}
+
+## 识别的专业方向：{identified_major}
+## 识别的技术栈：{'、'.join(tech_stack) if tech_stack else '通用技能'}
+
+请按以下 JSON 格式返回（不要添加任何其他文字，只返回纯 JSON）：
+
+{{
+  "job_analysis": {{
+    "position": "岗位名称（从JD提取）",
+    "core_requirements": ["核心要求1", "核心要求2", ...],
+    "key_skills": ["关键技能1", "关键技能2", ...],
+    "interview_difficulty": "面试难度评估（简单/中等/困难/极难）",
+    "salary_range": "薪资范围预估（从JD推断）"
+  }},
+  "behavioral_questions": [
+    {{
+      "question": "行为面试题（使用 STAR 法则回答）",
+      "category": "分类（如：团队协作/问题解决/领导力等）",
+      "hint": "答题提示（如何用STAR法则组织答案）",
+      "difficulty": "难度等级"
+    }}
+  ],
+  "technical_questions": [
+    {{
+      "question": "技术深度问题",
+      "category": "技术领域",
+      "follow_up": "可能的追问方向",
+      "difficulty": "难度等级"
+    }}
+  ],
+  "scenario_questions": [
+    {{
+      "scenario": "情景描述",
+      "question": "基于情景的问题",
+      "expected_approach": "期望的解决思路"
+    }}
+  ],
+  "suggested_follow_up_questions": [
+    "反问建议1（展示候选人深度思考的问题）",
+    "反问建议2",
+    ...
+  ],
+  "preparation_tips": [
+    "备考建议1",
+    "备考建议2",
+    ...
+  ]
+}}"""
+
+        try:
+            result = await ai_service.chat(
+                messages=[{"role": "user", "content": prompt}],
+                system_prompt="你是一个专业的面试准备助手，必须严格按照用户要求的JSON格式返回数据。"
+            )
+            
+            # 尝试解析 JSON
+            import json
+            # 清理可能存在的 markdown 标记
+            clean_result = result.strip()
+            if clean_result.startswith("```json"):
+                clean_result = clean_result[7:]
+            if clean_result.startswith("```"):
+                clean_result = clean_result[3:]
+            if clean_result.endswith("```"):
+                clean_result = clean_result[:-3]
+            clean_result = clean_result.strip()
+            
+            return json.loads(clean_result)
+        except Exception as e:
+            logger.error(f"生成 JD 面试题失败: {e}")
+            return {"error": f"生成失败: {str(e)}"}
+
+    async def generate_tech_stack_questions(self, tech_stack: list, ai_service) -> list:
+        """
+        针对 JD 技术栈生成深度技术题
+        每个技术点都会生成从基础到高级的递进式问题
+        """
+        if not tech_stack:
+            return []
+
+        prompt = f"""你是一位资深的技术面试官。请针对以下技术栈，为每个技术点设计 3 个递进式的深度技术面试题（基础→中级→高级）。
+
+## 技术栈列表：
+{', '.join(tech_stack)}
+
+请严格按以下 JSON 数组格式返回（每个技术点一个对象）：：
+
+[
+  {{
+    "technology": "技术名称",
+    "questions": [
+      {{
+        "level": "基础",
+        "question": "基础问题",
+        "expected_answer": "期望答案要点"
+      }},
+      {{
+        "level": "中级",
+        "question": "中级问题",
+        "expected_answer": "期望答案要点"
+      }},
+      {{
+        "level": "高级",
+        "question": "高级/架构级问题",
+        "expected_answer": "期望答案要点"
+      }}
+    ]
+  }}
+]"""
+
+        try:
+            result = await ai_service.chat(
+                messages=[{"role": "user", "content": prompt}],
+                system_prompt="你是技术面试专家，严格按照JSON格式返回，不要添加额外文字。"
+            )
+            
+            import json
+            clean_result = result.strip()
+            if clean_result.startswith("```json"):
+                clean_result = clean_result[7:]
+            if clean_result.startswith("```"):
+                clean_result = clean_result[3:]
+            if clean_result.endswith("```"):
+                clean_result = clean_result[:-3]
+            clean_result = clean_result.strip()
+            
+            return json.loads(clean_result)
+        except Exception as e:
+            logger.error(f"生成技术栈题目失败: {e}")
+            return []
+
+    async def generate_mock_interview_plan(self, jd_text: str, ai_service, duration_minutes: int = 30) -> dict:
+        """
+        生成结构化模拟面试计划
+        包含时间分配、题型分布、评分标准等
+        """
+        if not jd_text or len(jd_text) < 10:
+            return {"error": "JD 内容过短"}
+
+        prompt = f"""你是一位资深的面试培训专家。请根据以下 JD 设计一个完整的模拟面试计划。
+
+## JD 内容：
+{jd_text}
+## 预计面试时长：{duration_minutes} 分钟
+
+请按以下 JSON 格式返回模拟面试计划：
+
+{{
+  "interview_overview": {{
+    "total_duration": "{duration_minutes}分钟",
+    "rounds_count": "轮次数",
+    "focus_areas": ["重点考查领域1", "重点考查领域2"]
+  }},
+  "schedule": [
+    {{
+      "phase": "阶段名称（如：自我介绍/项目深挖/技术考核/HR面等）",
+      "duration_minutes": 时长,
+      "description": "本阶段说明",
+      "sample_questions": ["示例问题1", "示例问题2"],
+      "evaluation_criteria": ["评分标准1", "评分标准2"]
+    }}
+  ],
+  "scoring_rubric": {{
+    "excellent": "优秀标准描述（90-100分）",
+    "good": "良好标准描述（70-89分）",
+    "average": "一般标准描述（50-69分）",
+    "needs_improvement": "待改进标准描述（<50分）"
+  }},
+  "common_pitfalls": ["常见错误1", "常见错误2"],
+  "success_tips": ["成功建议1", "成功建议2"]
+}}"""
+
+        try:
+            result = await ai_service.chat(
+                messages=[{"role": "user", "content": prompt}],
+                system_prompt="你是面试培训专家，严格按照JSON格式返回完整计划。"
+            )
+            
+            import json
+            clean_result = result.strip()
+            if clean_result.startswith("```json"):
+                clean_result = clean_result[7:]
+            if clean_result.startswith("```"):
+                clean_result = clean_result[3:]
+            if clean_result.endswith("```"):
+                clean_result = clean_result[:-3]
+            clean_result = clean_result.strip()
+            
+            return json.loads(clean_result)
+        except Exception as e:
+            logger.error(f"生成模拟面试计划失败: {e}")
+            return {"error": f"生成失败: {str(e)}"}

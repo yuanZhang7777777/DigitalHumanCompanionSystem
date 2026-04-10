@@ -4,8 +4,10 @@ FastAPI 应用主入口
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 import logging
+import os
 
 from .config import settings
 from .database import connect_to_mongo, close_mongo_connection
@@ -40,6 +42,11 @@ app = FastAPI(
     redoc_url="/redoc",
     lifespan=lifespan,
 )
+
+# 挂载静态文件目录 (用于图片/视频上传预览)
+upload_dir = os.path.join(os.path.dirname(__file__), "static", "uploads", "chat")
+os.makedirs(upload_dir, exist_ok=True)
+app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static")), name="static")
 
 # 配置 CORS 中间件（开发环境允许所有来源）
 app.add_middleware(

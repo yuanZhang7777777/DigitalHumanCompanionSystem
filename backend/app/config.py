@@ -64,6 +64,7 @@ class Settings(BaseSettings):
     # ── 视频生成配置 ────────────────────────────────────────────────────────
     video_generation_enabled: bool = Field(default=False, alias="VIDEO_GENERATION_ENABLED")  # 视频生成开关（默认关闭）
     video_generation_reason: str = "因近期视频生成费用较高，系统默认关闭视频生成功能。如需开启，请修改 .env 文件设置 VIDEO_GENERATION_ENABLED=True"
+    video_api_key: str = Field(default="", alias="VIDEO_API_KEY")
 
     # ── 应用配置 ────────────────────────────────────────────────────────────
     app_name: str = "在 · 数字人情感陪伴系统"
