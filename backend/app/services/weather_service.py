@@ -1,10 +1,7 @@
 """
 天气查询服务模块
-核心功能：
-  1. 通过高德天气 API 获取城市天气预报
-  2. 从用户消息中智能提取城市名
-  3. 独立检测面试出行意图（任何场景下可触发）
-  4. 降级策略：API 不可用时静默跳过，不影响正常对话
+使用高德地图 Web 开放接口获取天气（基于用户提供的 API Key）。
+支持从聊天记录中自动抽取城市名称并进行天气和出行提示。
 """
 import httpx
 import re
@@ -15,40 +12,30 @@ from app.config import settings
 
 logger = logging.getLogger(__name__)
 
-
 class WeatherService:
     """天气查询服务，封装高德天气 API"""
-
-    # ── 支持的城市列表（省会 + 主要城市）──────────────────────────────────────
-    SUPPORTED_CITIES = [
-        # 直辖市
-        "北京", "上海", "天津", "重庆",
-        # 省会及主要城市
-        "广州", "深圳", "杭州", "成都", "武汉", "南京", "西安", "苏州",
-        "郑州", "长沙", "宁波", "青岛", "合肥", "无锡", "济南", "大连",
-        "厦门", "福州", "昆明", "贵阳", "南宁", "海口", "三亚",
-        "哈尔滨", "长春", "沈阳", "石家庄", "太原", "呼和浩特",
-        "乌鲁木齐", "兰州", "西宁", "银川", "拉萨",
-        "珠海", "东莞", "佛山", "中山", "惠州", "温州", "绍兴",
-        "常州", "南通", "扬州", "徐州", "烟台", "潍坊", "泉州",
-        "洛阳", "襄阳", "宜昌", "岳阳", "株洲", "秦皇岛", "唐山",
-        # 新一线及热门城市
-        "东莞", "佛山", "嘉兴", "金华", "台州", "威海", "湖州",
-    ]
-
-    # ── 面试出行关键词模式 ─────────────────────────────────────────────────
-    _TRIP_PATTERN = re.compile(
-        r"(明天|后天|下周|过两天|这周|周末|大后天)?"
-        r".{0,6}"
-        r"(去|到|飞|赶|出发去|动身去|前往)?"
-        r".{0,4}"
-        r"(面试|笔试|参加面试|复试|终面|现场面)"
-    )
 
     def __init__(self):
         self.api_key = settings.amap_api_key
         self.weather_url = settings.amap_weather_url
         self.geocode_url = settings.amap_geocode_url
+
+    def extract_city(self, text: str) -> Optional[str]:
+        """
+        从用户文本中提取目标城市
+        """
+        # 简单正则匹配：“XX天气”、“去XX”、“在XX”
+        cities = ["北京", "上海", "广州", "深圳", "杭州", "成都", "武汉", "南京", "西安", "苏州", "长沙", "重庆", "天津", "青岛", "厦门"]
+        for city in cities:
+            if city in text:
+                return city
+        
+        # 模糊匹配：(.*?)(天气|下雨|温度|大概几度|多热|冷吗)
+        match = re.search(r'([\u4e00-\u9fa5]{2,4})(?:市|省)?(?:的)?(?:天气|气温|温度|下雨|冷吗|热吗)', text)
+        if match:
+            return match.group(1)
+            
+        return None
 
     async def get_city_adcode(self, city_name: str) -> Optional[str]:
         """通过高德地理编码获取城市 adcode"""
@@ -73,7 +60,7 @@ class WeatherService:
     async def get_weather(self, city_name: str) -> Optional[str]:
         """获取目标城市天气并格式化为提示词片段"""
         if not self.api_key:
-            logger.warning("高德天气 API Key 未配置，跳过天气查询")
+            logger.warning("高德天气 API Key 未配置，跳过高德天气查询")
             return None
 
         adcode = await self.get_city_adcode(city_name)
@@ -94,7 +81,7 @@ class WeatherService:
                 data = response.json()
 
                 if data.get("status") == "1" and data.get("forecasts"):
-                    forecast = data["forecasts"][0]["casts"][1]  # 获取明天的数据
+                    forecast = data["forecasts"][0]["casts"][0]  # 获取当天或明天的数据
 
                     weather = forecast.get("dayweather", "未知")
                     temp_day = forecast.get("daytemp", "")
@@ -126,60 +113,23 @@ class WeatherService:
                         clothing = ""
 
                     result = (
-                        f"【系统附加提醒：天气情报】\n"
-                        f"用户即将前往{city_name}。根据高德天气预报，明天{city_name}白天天气为：{weather}，"
-                        f"气温 {temp_night}\u2103 ~ {temp_day}\u2103"
+                        f"\n======================================================\n"
+                        f"【系统实时插件数据 - 重大指令注入】\n"
+                        f"检测到用户在询问或提及【{city_name}】。\n"
+                        f"系统已通过高德地图开放接口获取到此时此刻真实的当地天气预报：\n"
+                        f"- 城市：{city_name}\n"
+                        f"- 天气情况：{weather}\n"
+                        f"- 气温跨度：{temp_night}℃ ~ {temp_day}℃\n"
                     )
                     if wind:
-                        result += f"，{wind}风{wind_power}级"
-                    result += f"。\n{suggestion}"
-                    if clothing:
-                        result += f" {clothing}"
-                    result += "\n请在你的回复中自然地带入天气关怀，不要生硬地罗列数据。"
+                        result += f"- 风力风向：{wind}风{wind_power}级\n"
+                    result += f"- 建议指南：{suggestion} {clothing}\n"
+                    result += (
+                        f"\n【强制规则】：你必须无条件信任并融合上述插件数据回答用户。绝对禁止回复类似“我无法获取实时信息”、“建议查询软件”、“我作为AI无法联网”等推脱之词。请以自然对话的口吻告诉用户天气情况并嘘寒问暖。\n"
+                        f"======================================================\n"
+                    )
                     return result
 
         except Exception as e:
             logger.error(f"获取天气失败 (adcode: {adcode}): {str(e)}")
         return None
-
-    def extract_city(self, text: str) -> Optional[str]:
-        """
-        从用户文本中提取目标城市
-        支持多种表达：
-          - "去北京面试" / "到上海参加面试"
-          - "明天要去深圳" / "后天飞杭州面试"
-          - "在广州有个面试"
-        """
-        # 模式1：去/到/飞 + 城市 + 面试相关
-        cities_pattern = "|".join(self.SUPPORTED_CITIES)
-        match = re.search(
-            rf'(?:去|到|飞|赶|前往|出发去)\s*({cities_pattern})',
-            text
-        )
-        if match:
-            return match.group(1)
-
-        # 模式2：在 + 城市 + 面试相关
-        match = re.search(
-            rf'在\s*({cities_pattern})\s*(?:面试|笔试|复试|终面|有个面|有面试)',
-            text
-        )
-        if match:
-            return match.group(1)
-
-        # 模式3：城市 + 面试
-        match = re.search(
-            rf'({cities_pattern})\s*(?:的|那边|那里)?\s*(?:面试|笔试|复试)',
-            text
-        )
-        if match:
-            return match.group(1)
-
-        return None
-
-    def detect_interview_trip(self, message: str) -> bool:
-        """
-        独立检测用户消息中是否包含面试出行意图
-        与场景检测解耦——即使不在 interview 场景下，也能触发天气查询
-        """
-        return bool(self._TRIP_PATTERN.search(message))

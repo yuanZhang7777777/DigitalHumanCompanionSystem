@@ -446,16 +446,15 @@ async def send_message(
         stage = _interview_service.detect_stage(cleaned_message)
         interview_knowledge = _interview_service.get_interview_knowledge(major, stage)
 
-    # 天气查询独立于场景——只要检测到面试出行意图就触发
-    if _prompt_service.detect_interview_trip(cleaned_message) or (scene == "interview"):
-        target_city = _weather_service.extract_city(cleaned_message)
-        if target_city:
-            try:
-                w_info = await _weather_service.get_weather(target_city)
-                if w_info:
-                    weather_info = w_info
-            except Exception as e:
-                logger.warning(f"天气查询失败（降级跳过）: {e}")
+    # 天气查询：独立于场景，只要提取到城市就查询天气
+    target_city = _weather_service.extract_city(cleaned_message)
+    if target_city:
+        try:
+            w_info = await _weather_service.get_weather(target_city)
+            if w_info:
+                weather_info = w_info
+        except Exception as e:
+            logger.warning(f"天气查询失败（降级跳过）: {e}")
 
     # 取出之前存储的摘要
     history_summary = conversation_obj.get("summary", "") if conversation_obj else ""
@@ -816,16 +815,15 @@ async def send_message_stream(
         # 将其合并到面试知识中，或者作为独立的片段
         interview_knowledge = (interview_knowledge + "\n\n" + jd_prompt).strip()
 
-    # 天气查询独立于场景——只要检测到面试出行意图就触发
-    if _prompt_service.detect_interview_trip(cleaned_message) or (scene in ["interview", "jd_analysis"]):
-        target_city = _weather_service.extract_city(cleaned_message)
-        if target_city:
-            try:
-                w_info = await _weather_service.get_weather(target_city)
-                if w_info:
-                    weather_info = w_info
-            except Exception as e:
-                logger.warning(f"天气查询失败（降级跳过）: {e}")
+    # 天气查询：独立于场景，只要提取到城市就查询天气
+    target_city = _weather_service.extract_city(cleaned_message)
+    if target_city:
+        try:
+            w_info = await _weather_service.get_weather(target_city)
+            if w_info:
+                weather_info = w_info
+        except Exception as e:
+            logger.warning(f"天气查询失败（降级跳过）: {e}")
 
     # 取出之前存储的摘要
     history_summary = conversation_obj.get("summary", "") if conversation_obj else ""
