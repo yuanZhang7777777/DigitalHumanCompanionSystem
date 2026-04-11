@@ -145,44 +145,47 @@ const handleSubmit = async () => {
 
 .login-header {
   text-align: center;
-  margin-bottom: var(--space-8);
+  margin-bottom: var(--space-6);
 }
 
 .login-brand-name {
+  font-family: var(--font-serif);
   font-size: clamp(2.25rem, 4vw, 3rem);
   font-weight: 500;
   letter-spacing: -0.02em;
-  color: var(--c-black);
+  color: var(--c-anthropic-black);
   margin-bottom: 8px;
 }
 
 .login-brand-tagline {
   font-size: 1rem;
-  color: var(--c-gray-600);
+  color: var(--c-olive-gray);
 }
 
 .login-card {
   width: 100%;
-  padding: var(--space-8) var(--space-10);
-  /* clean-pane 类已经从 style.css 中继承了圆角、模糊和轻阴影 */
+  padding: var(--space-6) var(--space-8);
+  background: var(--c-ivory);
+  border: 1px solid var(--c-border-cream);
+  border-radius: var(--radius-xl);
 }
 
 /* 标签切换 */
 .login-tabs {
   display: flex;
-  border-bottom: 1px solid var(--c-gray-100);
-  margin-bottom: var(--space-8);
+  border-bottom: 1px solid var(--c-border-warm);
+  margin-bottom: var(--space-5);
 }
 
 .login-tab {
-  padding: 12px 0;
-  margin-right: var(--space-8);
+  padding: 10px 0;
+  margin-right: var(--space-6);
   background: none;
   border: none;
-  font-family: var(--font);
-  font-size: 1rem;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
   font-weight: 500;
-  color: var(--c-gray-400);
+  color: var(--c-stone-gray);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
@@ -191,19 +194,19 @@ const handleSubmit = async () => {
 }
 
 .login-tab.active {
-  color: var(--c-google-blue);
-  border-bottom-color: var(--c-google-blue);
+  color: var(--c-primary);
+  border-bottom-color: var(--c-primary);
 }
 
 /* 错误提示 */
 .error-banner {
   background: #fef2f2;
   border: 1px solid #fecaca;
-  color: #dc2626;
+  color: var(--c-error-crimson);
   padding: 10px 16px;
   border-radius: var(--radius-md);
   font-size: 0.875rem;
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--space-4);
   line-height: 1.5;
 }
 
@@ -211,7 +214,7 @@ const handleSubmit = async () => {
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  gap: var(--space-4);
 }
 
 /* 密码输入框 */
@@ -231,30 +234,30 @@ const handleSubmit = async () => {
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--c-gray-400);
+  color: var(--c-stone-gray);
   display: flex;
   padding: 4px;
   transition: color var(--dur-fast);
 }
-.input-icon-btn:hover { color: var(--c-black); }
+.input-icon-btn:hover { color: var(--c-charcoal-warm); }
 
 /* 提交按钮 */
 .submit-btn {
   margin-top: var(--space-2);
-  height: 52px;
-  font-size: 1.05rem;
+  height: 48px;
+  font-size: 1rem;
 }
 
 /* 切换提示 */
 .login-switch-hint {
-  margin-top: var(--space-6);
+  margin-top: var(--space-5);
   text-align: center;
-  font-size: 0.9rem;
-  color: var(--c-gray-500);
+  font-size: 0.90rem;
+  color: var(--c-stone-gray);
 }
 
 .login-switch-hint a {
-  color: var(--c-google-blue);
+  color: var(--c-primary);
   font-weight: 500;
   cursor: pointer;
   text-decoration: none;

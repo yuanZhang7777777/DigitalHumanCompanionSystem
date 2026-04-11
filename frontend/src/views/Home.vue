@@ -224,12 +224,12 @@ onMounted(loadPersons)
 }
 
 .home-main {
-  padding: var(--space-12) 0 var(--space-20);
+  padding: var(--space-12) 0 var(--space-16);
 }
 
 /* 欢迎区 */
 .welcome-section {
-  padding: var(--space-8) 0 var(--space-6);
+  padding: var(--space-6) 0 var(--space-5);
 }
 
 .welcome-top {
@@ -244,21 +244,22 @@ onMounted(loadPersons)
   font-size: 0.875rem;
   font-weight: 500;
   letter-spacing: 0.02em;
-  color: var(--c-google-blue); /* 品牌色 */
+  color: var(--c-primary);
   margin-bottom: var(--space-2);
 }
 
 .welcome-title {
+  font-family: var(--font-serif);
   font-size: clamp(2rem, 3.5vw, 2.75rem);
-  font-weight: 500; /* Google 倾向于 Medium */
+  font-weight: 500;
   letter-spacing: -0.01em;
-  color: var(--c-black);
+  color: var(--c-anthropic-black);
 }
 
 .welcome-sub {
   margin-top: var(--space-2);
   font-size: 1rem;
-  color: var(--c-gray-600);
+  color: var(--c-olive-gray);
 }
 
 /* 加载状态 */
@@ -279,7 +280,7 @@ onMounted(loadPersons)
 
 .persons-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: var(--space-5);
 }
 
@@ -289,8 +290,8 @@ onMounted(loadPersons)
   flex-direction: column;
   gap: var(--space-4);
   cursor: pointer;
-  background: var(--c-white);
-  border: 1px solid var(--c-gray-300);
+  background: var(--c-ivory);
+  border: 1px solid var(--c-border-cream);
 }
 
 .person-card-header {
@@ -303,13 +304,12 @@ onMounted(loadPersons)
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  border: var(--border);
   overflow: hidden;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--c-gray-100);
+  background: var(--c-gray-200);
 }
 
 .person-avatar img {
@@ -319,9 +319,10 @@ onMounted(loadPersons)
 }
 
 .person-avatar-text {
+  font-family: var(--font-serif);
   font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--c-black);
+  font-weight: 500;
+  color: var(--c-charcoal-warm);
 }
 
 .person-info {
@@ -330,10 +331,11 @@ onMounted(loadPersons)
 }
 
 .person-name {
+  font-family: var(--font-serif);
   font-size: 1.1rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--c-black);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--c-anthropic-black);
   margin-bottom: 4px;
 }
 
@@ -362,14 +364,14 @@ onMounted(loadPersons)
 
 .tag-count {
   background: var(--c-gray-100);
-  color: var(--c-gray-500);
+  color: var(--c-stone-gray);
 }
 
 /* 简介 */
 .person-story {
   font-size: 0.875rem;
-  color: var(--c-gray-500);
-  line-height: 1.6;
+  color: var(--c-olive-gray);
+  line-height: 1.60;
   flex: 1;
 }
 
@@ -379,13 +381,13 @@ onMounted(loadPersons)
   align-items: center;
   justify-content: space-between;
   padding-top: var(--space-3);
-  border-top: 1px solid var(--c-gray-100);
+  border-top: 1px solid var(--c-border-warm);
   margin-top: auto;
 }
 
 .person-date {
   font-size: 0.75rem;
-  color: var(--c-gray-400);
+  color: var(--c-stone-gray);
   font-variant-numeric: tabular-nums;
 }
 
@@ -393,7 +395,7 @@ onMounted(loadPersons)
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.4);
+  background: rgba(20, 20, 19, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -402,28 +404,29 @@ onMounted(loadPersons)
 }
 
 .modal {
-  background: var(--c-white);
-  border: 1px solid var(--c-gray-100);
+  background: var(--c-ivory);
+  border: 1px solid var(--c-border-cream);
   border-radius: var(--radius-xl);
-  padding: var(--space-8);
+  padding: var(--space-6);
   max-width: 420px;
   width: calc(100% - 48px);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  box-shadow: var(--shadow-xl);
+  box-shadow: var(--shadow-whisper);
 }
 
 .modal h3 {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: var(--c-black);
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--c-anthropic-black);
 }
 
 .modal p {
-  font-size: 0.9rem;
-  color: var(--c-gray-600);
-  line-height: 1.65;
+  font-size: 0.90rem;
+  color: var(--c-olive-gray);
+  line-height: 1.60;
 }
 
 .modal-actions {
@@ -434,9 +437,9 @@ onMounted(loadPersons)
 }
 
 .btn-danger {
-  background: #dc2626;
-  color: #fff;
-  border: none;
+  background: transparent;
+  color: var(--c-error-crimson);
+  border: 1px solid #e8c4c4;
 }
-.btn-danger:hover { background: #b91c1c; }
+.btn-danger:hover { background: #fef2f2; }
 </style>

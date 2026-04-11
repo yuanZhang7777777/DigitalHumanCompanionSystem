@@ -1,73 +1,98 @@
 /* ========================================================
-   全局设计系统 — 顶级极简白 (Premium Dynamic Minimalist White)
-   字体：Inter
-   核心：极致留白、克制的颜色、干脆而带有呼吸感的物理弹簧动画
+   全局设计系统 — Claude (Anthropic) 温暖文学沙龙风格
+   字体：Georgia (Serif) + Inter (Sans)
+   核心：温暖的大地色调、文学气质、柔和圆角、ring阴影系统
    ======================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700&display=swap');
 
-/* ── 设计令牌 ─────────────────────────────────────────── */
+/* ── 设计令牌 (Claude Design System) ───────────────────── */
 :root {
-  /* Google Modern UI 调色板 (Official Google Palette) */
+  /* 主品牌色 */
+  --c-primary: #c96442;
+  --c-primary-hover: #b55a3a;
+  --c-primary-light: rgba(201, 100, 66, 0.08);
+
+  /* Anthropic 色彩系统 */
+  --c-parchment: #f5f4ed;
+  --c-ivory: #faf9f5;
   --c-white: #ffffff;
-  --c-offwhite: #f8f9fa;
-  --c-black: #202124;
-  /* Google Text Dark */
+  --c-warm-sand: #e8e6dc;
 
-  --c-google-blue: #1a73e8;
-  /* Standard Google Blue */
-  --c-google-blue-hover: #174ea6;
-  --c-google-blue-light: #e8f0fe;
-  --c-google-red: #ea4335;
-  --c-google-yellow: #fbbc04;
-  --c-google-green: #34A853;
-  --c-google-purple: #a142f4;
+  --c-anthropic-black: #141413;
+  --c-dark-surface: #30302e;
+  --c-charcoal-warm: #4d4c48;
+  --c-olive-gray: #5e5d59;
+  --c-stone-gray: #87867f;
+  --c-warm-silver: #b0aea5;
 
-  /* 背景：更干净的实心背景或极简渐变 */
-  --c-bg-app: #ffffff;
-  --c-bg-page: #f8f9fa;
+  --c-border-cream: #f0eee6;
+  --c-border-warm: #e8e6dc;
+  --c-ring-warm: #d1cfc5;
+  --c-ring-deep: #c2c0b6;
 
-  --c-gray-50: #f8f9fa;
-  --c-gray-100: #f1f3f4;
-  --c-gray-200: #e8eaed;
-  --c-gray-300: #dadce0;
-  --c-gray-400: #9aa0a6;
-  --c-gray-500: #80868b;
-  --c-gray-600: #5f6368;
-  --c-gray-700: #3c4043;
-  --c-gray-800: #202124;
-  --c-gray-900: #1f1f1f;
+  --c-error-crimson: #b53333;
+  --c-focus-blue: #3898ec;
 
-  /* 主品牌色：改为谷歌蓝 */
-  --c-primary: var(--c-google-blue);
+  /* 背景 */
+  --c-bg-app: var(--c-parchment);
+  --c-bg-page: var(--c-parchment);
 
-  /* 排版：使用更接近 Google Sans 的字体 */
-  --font: 'Google Sans', 'Product Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* 灰色系统（统一暖色调） */
+  --c-gray-50: #faf9f5;
+  --c-gray-100: #f5f4ed;
+  --c-gray-200: #e8e6dc;
+  --c-gray-300: #dad8d0;
+  --c-gray-400: #c8c5bc;
+  --c-gray-500: #a8a59a;
+  --c-gray-600: #87867f;
+  --c-gray-700: #5e5d59;
+  --c-gray-800: #4d4c48;
+  --c-gray-900: #3d3d3a;
+
+  /* 兼容性别名（保持组件scoped样式正常工作） */
+  --c-black: var(--c-anthropic-black);
+  --c-google-blue: var(--c-primary);
+  --c-google-blue-hover: var(--c-primary-hover);
+  --c-google-blue-light: var(--c-primary-light);
+
+  /* 兼容性别名：border变量 */
+  --border: 1px solid var(--c-border-cream);
+  --border-warm: 1px solid var(--c-border-warm);
+
+  /* 排版：Georgia替代Anthropic Serif，Inter替代Anthropic Sans */
+  --font-serif: 'Noto Serif SC', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font: var(--font-sans);
 
   /* 间距 */
-  --space-1: 8px;
-  --space-2: 12px;
-  --space-3: 16px;
-  --space-4: 24px;
-  --space-5: 32px;
-  --space-6: 48px;
-  --space-8: 64px;
-  --space-10: 80px;
-  --space-12: 100px;
-  --space-16: 140px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-8: 48px;
+  --space-10: 64px;
+  --space-12: 80px;
+  --space-16: 120px;
 
-  /* 圆角：谷歌倾向于适中的圆角或大圆角，这里采用 8px-24px */
+  /* 圆角系统（Claude风格：柔和圆润） */
   --radius-xs: 4px;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 18px;
-  --radius-xl: 24px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-3xl: 32px;
   --radius-full: 9999px;
 
-  /* 谷歌风格阴影：非常轻盈且真实 */
-  --shadow-sm: 0 1px 2px 0 rgba(60, 64, 67, .3), 0 1px 3px 1px rgba(60, 64, 67, .15);
-  --shadow-md: 0 1px 3px 0 rgba(60, 64, 67, .3), 0 4px 8px 3px rgba(60, 64, 67, .15);
-  --shadow-lg: 0 4px 4px 0 rgba(60, 64, 67, .3), 0 8px 12px 6px rgba(60, 64, 67, .15);
+  /* 阴影系统（ring-based + whisper） */
+  --shadow-ring: 0px 0px 0px 1px;
+  --shadow-whisper: rgba(0, 0, 0, 0.05) 0px 4px 24px;
+  --shadow-sm: 0 1px 2px 0 rgba(60, 64, 67, 0.15), 0 1px 3px 1px rgba(60, 64, 67, 0.1);
+  --shadow-md: 0 4px 4px 0 rgba(60, 64, 67, 0.1), 0 8px 12px 6px rgba(60, 64, 67, 0.08);
+  --shadow-lg: 0 8px 8px 0 rgba(60, 64, 67, 0.1), 0 16px 24px 12px rgba(60, 64, 67, 0.08);
 
   /* 动画 */
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
@@ -92,85 +117,98 @@ html {
 }
 
 body {
-  font-family: var(--font);
+  font-family: var(--font-sans);
   background: var(--c-bg-app);
-  color: var(--c-gray-700);
+  color: var(--c-charcoal-warm);
   line-height: 1.6;
   min-height: 100vh;
   overflow-x: hidden;
 }
 
-/* ── 排版 (纯净克制) ────────────────────────────────── */
+/* ── 排版 (温暖文学风格) ─────────────────────────────── */
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
-  font-weight: 700;
-  line-height: 1.15;
-  letter-spacing: -0.03em;
-  color: var(--c-black);
+  font-family: var(--font-serif);
+  font-weight: 500;
+  line-height: 1.20;
+  letter-spacing: -0.01em;
+  color: var(--c-anthropic-black);
 }
 
 h1 {
-  font-size: clamp(3rem, 6vw, 5rem);
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  line-height: 1.10;
 }
 
 h2 {
-  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  line-height: 1.15;
 }
 
 h3 {
-  font-size: clamp(1.25rem, 2vw, 1.75rem);
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  line-height: 1.20;
+}
+
+h4 {
+  font-size: clamp(1.25rem, 2vw, 1.6rem);
+  line-height: 1.25;
 }
 
 p {
-  color: var(--c-gray-600);
-  line-height: 1.8;
-  letter-spacing: -0.01em;
+  color: var(--c-olive-gray);
+  line-height: 1.60;
+  letter-spacing: -0.005em;
 }
 
-/* ── 实心卡片 / 面板 (Google Workspace Style) ───────────── */
+/* ── 实心卡片 / 面板 (Claude Style) ────────────────────── */
 .clean-pane {
-  background: var(--c-white);
-  border: 1px solid var(--c-gray-300);
+  background: var(--c-ivory);
+  border: 1px solid var(--c-border-cream);
   box-shadow: none;
-  border-radius: var(--radius-sm);
-  transition: box-shadow var(--dur-normal);
+  border-radius: var(--radius-md);
+  transition: box-shadow var(--dur-normal) var(--ease);
 }
 
-/* 动态卡片 (Google Search Result / Feed style) */
+.clean-pane:hover {
+  box-shadow: var(--shadow-whisper);
+}
+
+/* 动态卡片 (Claude Editorial Card) */
 .dynamic-card {
-  background: var(--c-white);
-  border: 1px solid var(--c-gray-300);
-  border-radius: var(--radius-sm);
-  padding: var(--space-4);
-  transition: box-shadow var(--dur-fast), border-color var(--dur-fast);
+  background: var(--c-ivory);
+  border: 1px solid var(--c-border-cream);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  transition: box-shadow var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
   position: relative;
   overflow: hidden;
 }
 
 .dynamic-card:hover {
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-ring) var(--c-ring-warm);
   border-color: transparent;
   z-index: 10;
 }
 
 .dynamic-card:active {
-  background: var(--c-gray-50);
+  background: var(--c-gray-100);
 }
 
-/* ── 按钮系统 (Pills & Solid) ────────────────────────── */
+/* ── 按钮系统 (Claude Style) ─────────────────────────── */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-1);
-  padding: 12px 24px;
-  border-radius: 100px;
-  font-family: var(--font);
-  font-size: 1rem;
+  gap: var(--space-2);
+  padding: 10px 20px;
+  border-radius: var(--radius-lg);
+  font-family: var(--font-sans);
+  font-size: 0.94rem;
   font-weight: 500;
   letter-spacing: -0.01em;
   cursor: pointer;
@@ -180,68 +218,79 @@ p {
   text-decoration: none;
 }
 
-/* 主按钮：改为谷歌蓝 */
+/* 主按钮：Terracotta Brand */
 .btn-primary {
-  background: var(--c-google-blue);
-  color: var(--c-white);
+  background: var(--c-primary);
+  color: var(--c-ivory);
+  box-shadow: var(--shadow-ring) var(--c-primary);
 }
 
 .btn-primary:hover {
-  background: var(--c-google-blue-hover);
-  box-shadow: 0 1px 3px 1px rgba(66, 133, 244, .15), 0 1px 2px 0 rgba(66, 133, 244, .3);
+  background: var(--c-primary-hover);
+  box-shadow: var(--shadow-ring) var(--c-ring-warm), 0 2px 8px rgba(201, 100, 66, 0.2);
 }
 
 .btn-primary:active {
-  background: #1967d2;
+  background: #a54d30;
+  box-shadow: inset 0px 0px 0px 1px rgba(0, 0, 0, 0.15);
 }
 
-/* 次要按钮：白底/浅灰，无边线 */
+/* 次要按钮：Warm Sand */
 .btn-secondary {
-  background: #F1F3F4;
-  color: #1F1F1F;
-  border: 1px solid transparent;
+  background: var(--c-warm-sand);
+  color: var(--c-charcoal-warm);
+  border: 1px solid var(--c-border-warm);
+  box-shadow: var(--shadow-ring) var(--c-warm-sand);
 }
 
 .btn-secondary:hover {
-  background: #E8EAED;
-  color: #1F1F1F;
+  background: #dedbd0;
+  color: var(--c-anthropic-black);
+  box-shadow: var(--shadow-ring) var(--c-ring-warm);
 }
 
-/* 幽灵按钮：仅文字悬浮变色 */
+/* 幽灵按钮：透明悬浮 */
 .btn-ghost {
   background: transparent;
-  color: var(--c-gray-500);
+  color: var(--c-olive-gray);
 }
 
 .btn-ghost:hover {
-  color: var(--c-black);
+  color: var(--c-anthropic-black);
   background: var(--c-gray-100);
 }
 
-/* 危险按钮：克制的红 */
+.btn-ghost.active {
+  color: var(--c-primary);
+  background: var(--c-primary-light);
+}
+
+/* 危险按钮：Error Crimson */
 .btn-danger {
   background: transparent;
-  color: #dc2626;
-  border: 1px solid #fecaca;
+  color: var(--c-error-crimson);
+  border: 1px solid #e8c4c4;
 }
 
 .btn-danger:hover {
-  background: #fee2e2;
+  background: #fef2f2;
 }
 
 /* 尺寸变体 */
 .btn-sm {
-  padding: 8px 16px;
+  padding: 6px 14px;
   font-size: 0.85rem;
+  border-radius: var(--radius-md);
 }
 
 .btn-lg {
-  padding: 18px 40px;
-  font-size: 1.05rem;
+  padding: 14px 32px;
+  font-size: 1rem;
+  border-radius: var(--radius-xl);
 }
 
 .btn-icon {
-  padding: 12px;
+  padding: 10px;
   border-radius: 50%;
 }
 
@@ -256,62 +305,62 @@ p {
   cursor: not-allowed;
 }
 
-/* ── 表单系统 (Clean Fields) ─────────────────────────── */
+/* ── 表单系统 (Claude Style) ─────────────────────────── */
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-2);
 }
 
 .form-label {
   font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--c-gray-500);
-  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.12px;
+  color: var(--c-olive-gray);
+  text-transform: none;
 }
 
 .form-input,
 .form-textarea,
 .form-select {
   width: 100%;
-  padding: 16px 20px;
-  border: 1px solid var(--c-gray-200);
-  border-radius: var(--radius-md);
-  font-family: var(--font);
+  padding: 12px 16px;
+  border: 1px solid var(--c-border-warm);
+  border-radius: var(--radius-lg);
+  font-family: var(--font-sans);
   font-size: 1rem;
-  color: var(--c-black);
-  background: var(--c-gray-50);
+  color: var(--c-anthropic-black);
+  background: var(--c-ivory);
   transition: all var(--dur-fast) var(--ease);
   outline: none;
   appearance: none;
+  line-height: 1.50;
 }
 
 .form-input:hover,
 .form-textarea:hover,
 .form-select:hover {
-  border-color: var(--c-gray-300);
+  border-color: var(--c-ring-warm);
 }
 
 .form-input:focus,
 .form-textarea:focus,
 .form-select:focus {
   background: var(--c-white);
-  border-color: var(--c-google-blue);
-  box-shadow: 0 0 0 1px var(--c-google-blue);
-  /* 柔和的 Google 蓝输入框反馈 */
+  border-color: var(--c-focus-blue);
+  box-shadow: 0 0 0 2px rgba(56, 152, 236, 0.2);
 }
 
 .form-input::placeholder,
 .form-textarea::placeholder {
-  color: var(--c-gray-400);
+  color: var(--c-stone-gray);
   font-weight: 400;
 }
 
 .form-textarea {
   resize: vertical;
   min-height: 120px;
-  line-height: 1.6;
+  line-height: 1.60;
 }
 
 /* ── 标签系统 (Quiet Badges) ─────────────────────────── */
@@ -319,20 +368,20 @@ p {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  padding: 6px 14px;
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
-  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: var(--radius-2xl);
+  font-size: 0.80rem;
+  font-weight: 500;
   background: var(--c-gray-100);
-  color: var(--c-gray-600);
+  color: var(--c-olive-gray);
   border: 1px solid transparent;
   transition: all var(--dur-fast);
   white-space: nowrap;
 }
 
 .tag-filled {
-  background: var(--c-black);
-  color: var(--c-white);
+  background: var(--c-charcoal-warm);
+  color: var(--c-ivory);
 }
 
 .tag-removable {
@@ -346,17 +395,17 @@ p {
 /* ── 分割线 ───────────────────────────────────────────── */
 .divider {
   border: none;
-  border-top: 1px solid var(--c-gray-100);
+  border-top: 1px solid var(--c-border-warm);
   margin: var(--space-8) 0;
 }
 
-/* ── 加载动画 (简约黑圈) ──────────────────────────────── */
+/* ── 加载动画 (简约温暖圈) ─────────────────────────────── */
 .spinner {
   display: inline-block;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border: 2px solid var(--c-gray-200);
-  border-top-color: var(--c-black);
+  border-top-color: var(--c-charcoal-warm);
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
 }
@@ -367,7 +416,7 @@ p {
   }
 }
 
-/* ── 页面过渡与进入动画 (Staggered Stiff Tween) ───────── */
+/* ── 页面过渡与进入动画 ───────────────────────────────── */
 .page-enter-active,
 .page-leave-active {
   transition: opacity var(--dur-normal) var(--ease),
@@ -376,7 +425,7 @@ p {
 
 .page-enter-from {
   opacity: 0;
-  transform: translateY(10px);
+  transform: translateY(12px);
 }
 
 .page-leave-to {
@@ -412,7 +461,7 @@ p {
 }
 
 .animate-scale-in {
-  animation: scaleIn var(--dur-slow) var(--ease) both;
+  animation: scaleIn var(--dur-normal) var(--ease) both;
 }
 
 .delay-1 {
@@ -439,19 +488,19 @@ p {
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 var(--space-4);
+  padding: 0 var(--space-5);
 }
 
-/* ── 极简导航栏 (Sterile Header) ─────────────────────── */
+/* ── 温暖导航栏 (Claude Header) ───────────────────────── */
 .app-header {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(250, 249, 245, 0.95);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--c-gray-100);
-  height: 80px;
+  border-bottom: 1px solid var(--c-border-cream);
+  height: 72px;
   display: flex;
   align-items: center;
   transition: border-bottom-color var(--dur-fast);
@@ -465,10 +514,11 @@ p {
 }
 
 .app-logo {
-  font-size: 1.25rem;
-  font-weight: 800;
-  letter-spacing: -0.05em;
-  color: var(--c-black);
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--c-anthropic-black);
 }
 
 .app-nav {
@@ -479,22 +529,22 @@ p {
 
 .nav-link {
   padding: 8px 16px;
-  border-radius: var(--radius-full);
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--c-gray-500);
+  border-radius: var(--radius-lg);
+  font-size: 0.90rem;
+  font-weight: 500;
+  color: var(--c-olive-gray);
   transition: all var(--dur-fast);
   cursor: pointer;
 }
 
 .nav-link:hover {
-  color: var(--c-black);
+  color: var(--c-anthropic-black);
   background: var(--c-gray-100);
 }
 
 .nav-link.active {
-  color: var(--c-black);
-  background: var(--c-gray-100);
+  color: var(--c-primary);
+  background: var(--c-primary-light);
 }
 
 /* ── 优雅滚动条 ───────────────────────────────────────── */
@@ -508,36 +558,35 @@ p {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--c-gray-200);
+  background: var(--c-gray-300);
   border-radius: 8px;
-  border: 2px solid var(--c-white);
-  /* 造成内补丁的错觉 */
+  border: 2px solid var(--c-ivory);
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--c-gray-400);
 }
 
-/* ── 强制反色选中 ─────────────────────────────────────── */
+/* ── 温暖反色选中 ─────────────────────────────────────── */
 ::selection {
-  background: var(--c-black);
-  color: var(--c-white);
+  background: var(--c-anthropic-black);
+  color: var(--c-ivory);
 }
 
-/* ── 极简 Toast 提示 ──────────────────────────────────── */
+/* ── 温暖 Toast 提示 ──────────────────────────────────── */
 .toast {
   position: fixed;
   bottom: 40px;
   left: 50%;
   transform: translateX(-50%) translateY(100px);
-  background: var(--c-white);
-  color: var(--c-black);
-  padding: 16px 32px;
-  border-radius: var(--radius-full);
-  font-size: 0.9rem;
-  font-weight: 600;
-  box-shadow: var(--shadow-lg);
-  border: 1px solid var(--c-gray-100);
+  background: var(--c-ivory);
+  color: var(--c-anthropic-black);
+  padding: 14px 28px;
+  border-radius: var(--radius-2xl);
+  font-size: 0.90rem;
+  font-weight: 500;
+  box-shadow: var(--shadow-whisper);
+  border: 1px solid var(--c-border-cream);
   z-index: 9999;
   transition: transform var(--dur-slow) var(--ease);
   white-space: nowrap;
@@ -545,4 +594,197 @@ p {
 
 .toast.show {
   transform: translateX(-50%) translateY(0);
+}
+
+/* ── 模态框 ───────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 20, 19, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--space-4);
+}
+
+.modal {
+  background: var(--c-ivory);
+  border: 1px solid var(--c-border-cream);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  max-width: 420px;
+  width: 100%;
+  box-shadow: var(--shadow-whisper);
+}
+
+.modal h3 {
+  font-size: 1.35rem;
+  margin-bottom: var(--space-3);
+}
+
+.modal p {
+  color: var(--c-olive-gray);
+  line-height: 1.60;
+  margin-bottom: var(--space-5);
+}
+
+.modal-actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+}
+
+/* ── 错误/成功提示 ────────────────────────────────────── */
+.error-banner {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: var(--c-error-crimson);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: 0.90rem;
+  margin-bottom: var(--space-4);
+}
+
+.msg-bar {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: 0.90rem;
+}
+
+.msg-bar.success {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+.msg-bar.error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: var(--c-error-crimson);
+}
+
+/* ── 加载状态 ─────────────────────────────────────────── */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-10);
+  color: var(--c-stone-gray);
+}
+
+.loading-state .spinner {
+  width: 24px;
+  height: 24px;
+}
+
+/* ── 空状态 ───────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: var(--space-10) var(--space-4);
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: var(--space-4);
+}
+
+.empty-state h3 {
+  font-size: 1.35rem;
+  margin-bottom: var(--space-2);
+}
+
+.empty-state p {
+  color: var(--c-stone-gray);
+  margin-bottom: var(--space-5);
+}
+
+/* ── 输入组 ───────────────────────────────────────────── */
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-with-icon .form-input {
+  padding-right: 44px;
+}
+
+.input-icon-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--c-stone-gray);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.input-icon-btn:hover {
+  color: var(--c-charcoal-warm);
+}
+
+/* ── 隐藏元素 ─────────────────────────────────────────── */
+.hidden-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+}
+
+/* ── 灵活的 flex 工具 ─────────────────────────────────── */
+.flex {
+  display: flex;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ── 响应式断点 ───────────────────────────────────────── */
+@media (max-width: 768px) {
+  :root {
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 32px;
+    --space-8: 40px;
+  }
+
+  .app-header {
+    height: 64px;
+  }
+
+  .container {
+    padding: 0 var(--space-4);
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --space-4: 12px;
+    --space-5: 16px;
+    --space-6: 24px;
+  }
+
+  .btn {
+    padding: 10px 16px;
+  }
+
+  .btn-lg {
+    padding: 12px 24px;
+  }
 }
