@@ -1,0 +1,22 @@
+// 1. users 集合索引：用户名唯一索引、时间排序索引
+db.users.createIndex({ "username": 1 }, { unique: true })
+db.users.createIndex({ "created_at": -1 })
+
+// 2. digital_persons 集合索引：按用户查询、按用户+时间排序
+db.digital_persons.createIndex({ "user_id": 1 })
+db.digital_persons.createIndex({ "user_id": 1, "created_at": -1 })
+
+// 3. conversations 集合索引：用户会话查询、数字人关联查询
+db.conversations.createIndex({ "user_id": 1, "created_at": -1 })
+db.conversations.createIndex({ "digital_person_id": 1 })
+
+// 4. messages 集合索引：按会话查询消息，按时间排序
+db.messages.createIndex({ "conversation_id": 1, "timestamp": 1 })
+
+// 5. user_memories 集合索引：用户+数字人记忆查询、去重索引、分类查询
+db.user_memories.createIndex({ "user_id": 1, "digital_person_id": 1 })
+db.user_memories.createIndex({ "content_hash": 1 }, { unique: true })
+db.user_memories.createIndex({ "user_id": 1, "category": 1 })
+
+// 6. profiles 集合索引：按用户唯一查询职业档案
+db.profiles.createIndex({ "user_id": 1 }, { unique: true })
