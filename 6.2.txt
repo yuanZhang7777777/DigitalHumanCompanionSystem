@@ -1,0 +1,25 @@
+6.2去重双重机制:
+1. SHA256 哈希精确匹配
+2. Jaccard 相似度检测 (阈值 0.85)
+
+存储向量维度: 1536 (text-embedding-v3)
+
+召回权重计算:
+召回分数 = 语义相似度 x 0.7 + 重要性评分 x 0.3
+
+
+6.3并发控制
+
+每用户最大并发: 2
+限流策略: Semaphore 信号量
+超时监控: 45秒 Watchdog
+
+6.4 提示词组装顺序
+
+1. 数字人基础人设 (name, relationship, personality)
+2. 场景专属Prompt片段 (SCENE_PROMPTS[scene])
+3. 用户职业档案 (profile)
+4. 相关记忆上下文 (user_memories)
+5. 天气情报 (weather)
+6. 历史摘要 (summary)
+7. 安全准则 (SAFETY_RULES)
