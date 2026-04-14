@@ -618,7 +618,8 @@ const promptMsgType = ref('success')
 
 // 语音
 const isListening = ref(false)
-let recognition = null
+let mediaRecorder = null
+let audioChunks = []
 const playingMsgId = ref(null) // 记录当前正在正在朗读的消息ID/Index
 
 // Toast
@@ -1190,28 +1191,93 @@ const sendMessage = async () => {
   }
 }
 
-// ── 语音输入 ──────────────────────────────────────────────────────────────────
-const initSpeech = () => {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-  if (!SR) return null
-  const r = new SR()
-  r.lang = 'zh-CN'
-  r.continuous = false
-  r.interimResults = true
-  r.onresult = (e) => {
-    inputText.value = Array.from(e.results).map(r => r[0].transcript).join('')
-    autoResize()
+// ── 语音输入（录音 → 后端 ASR → 文字）──────────────────────────────────────
+const startListening = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    audioChunks = []
+
+    // 优先使用 wav 格式，兼容性好；否则让浏览器自行选择
+    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+      ? 'audio/webm;codecs=opus'
+      : 'audio/webm'
+
+    mediaRecorder = new MediaRecorder(stream, { mimeType })
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) audioChunks.push(e.data)
+    }
+    mediaRecorder.onstop = async () => {
+      // 停止所有音轨，释放麦克风
+      stream.getTracks().forEach(t => t.stop())
+      isListening.value = false
+
+      if (audioChunks.length === 0) {
+        showToast('未录制到音频')
+        return
+      }
+
+      const blob = new Blob(audioChunks, { type: mimeType })
+      await sendAudioToBackend(blob)
+    }
+    mediaRecorder.onerror = () => {
+      stream.getTracks().forEach(t => t.stop())
+      isListening.value = false
+      showToast('录音出错，请重试')
+    }
+
+    mediaRecorder.start()
+    isListening.value = true
+  } catch (err) {
+    isListening.value = false
+    if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+      showToast('麦克风权限被拒绝，请在浏览器设置中允许使用麦克风')
+    } else {
+      showToast('无法访问麦克风：' + err.message)
+    }
   }
-  r.onend = () => { isListening.value = false }
-  r.onerror = () => { isListening.value = false }
-  return r
+}
+
+const stopListening = () => {
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    mediaRecorder.stop()
+  }
+}
+
+const sendAudioToBackend = async (blob) => {
+  try {
+    const ext = blob.type.includes('webm') ? 'webm' : 'wav'
+    const formData = new FormData()
+    formData.append('file', blob, `recording.${ext}`)
+
+    const resp = await fetch('/api/asr/transcribe', {
+      method: 'POST',
+      body: formData,
+    })
+
+    if (!resp.ok) {
+      const errData = await resp.json().catch(() => ({}))
+      throw new Error(errData.detail || `请求失败 (${resp.status})`)
+    }
+
+    const data = await resp.json()
+    if (data.text) {
+      inputText.value = data.text
+      autoResize()
+      showToast('语音识别完成')
+    } else {
+      showToast('未识别到语音内容，请重试')
+    }
+  } catch (err) {
+    showToast('语音识别失败：' + err.message)
+  }
 }
 
 const toggleVoice = () => {
-  if (!recognition) recognition = initSpeech()
-  if (!recognition) { alert('浏览器不支持语音输入，请使用 Chrome'); return }
-  if (isListening.value) { recognition.stop(); isListening.value = false }
-  else { recognition.start(); isListening.value = true }
+  if (isListening.value) {
+    stopListening()
+  } else {
+    startListening()
+  }
 }
 
 // ── 语音朗读 (TTS) ────────────────────────────────────────────────────────────
@@ -1447,6 +1513,10 @@ onUnmounted(() => {
     window.currentAudio.pause()
     window.currentAudio.src = ''
     window.currentAudio = null
+  }
+  // 停止语音录音
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    mediaRecorder.stop()
   }
   // 移除粘贴监听
   document.removeEventListener('paste', handlePaste)

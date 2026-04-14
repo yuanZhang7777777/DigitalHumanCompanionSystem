@@ -11,7 +11,7 @@ import os
 
 from .config import settings
 from .database import connect_to_mongo, close_mongo_connection
-from .routers import auth, digital_person, conversation, memory, profile, tts, extraction
+from .routers import auth, digital_person, conversation, memory, profile, tts, extraction, asr
 
 # 配置日志格式 (force=True 强制覆盖 uvicorn 默认的 root handler配置，避免日志丢失)
 logging.basicConfig(
@@ -64,6 +64,7 @@ app.include_router(conversation.router)
 app.include_router(memory.router)
 app.include_router(profile.router)
 app.include_router(tts.router)
+app.include_router(asr.router)
 app.include_router(extraction.router, prefix="/api", tags=["Extraction"])
 
 @app.get("/", tags=["系统"])
